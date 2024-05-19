@@ -14,6 +14,8 @@ BRICK_WIDTH = 60
 BRICK_HEIGHT = 20
 BRICK_ROWS = 5
 BRICK_COLS = WIDTH // BRICK_WIDTH
+MAX_BOUNCE_ANGLE = 45  # Max bounce angle in degrees
+MIN_BALL_SPEED_Y = 2  # Minimum vertical speed of the ball
 
 # Game objects
 paddle = Rect((WIDTH // 2 - PADDLE_WIDTH // 2, HEIGHT - 30), (PADDLE_WIDTH, PADDLE_HEIGHT))  # type: ignore
@@ -56,7 +58,7 @@ def update_ball():
 
     # Ball collision with paddle
     if ball.colliderect(paddle):  # type: ignore
-        ball_speed[1] = -ball_speed[1]
+        bounce_ball_off_paddle()
 
     # Ball goes out of bounds (bottom)
     if ball.bottom >= HEIGHT:
@@ -69,6 +71,16 @@ def check_ball_brick_collision():
             bricks.remove(brick)
             ball_speed[1] = -ball_speed[1]
             break
+
+def bounce_ball_off_paddle():
+    offset = (ball.centerx - paddle.centerx) / (PADDLE_WIDTH / 2)
+    bounce_angle = offset * MAX_BOUNCE_ANGLE
+    ball_speed[0] = BALL_SPEED_X * (1 if ball_speed[0] > 0 else -1)  # Maintain horizontal direction
+    ball_speed[1] = -BALL_SPEED_Y
+
+    # Adjust vertical speed based on offset but ensure it's above the minimum speed
+    if offset != 0:
+        ball_speed[0] = BALL_SPEED_X * offset
 
 def reset_ball():
     ball.x = WIDTH // 2 - BALL_SIZE // 2
