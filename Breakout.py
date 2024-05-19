@@ -13,7 +13,9 @@ BALL_SPEED_Y = 4
 BRICK_WIDTH = 60
 BRICK_HEIGHT = 20
 BRICK_ROWS = 5
-BRICK_COLS = WIDTH // BRICK_WIDTH
+BRICK_COLS = WIDTH // BRICK_WIDTH - 2  # Two columns fewer to leave space on the sides
+BRICK_START_X = BRICK_WIDTH  # Start one brick width in from the left
+BRICK_START_Y = BRICK_HEIGHT  # Start one brick height down from the top
 MAX_BOUNCE_ANGLE = 45  # Max bounce angle in degrees
 MIN_BALL_SPEED_Y = 2  # Minimum vertical speed of the ball
 
@@ -23,7 +25,7 @@ ball = Rect((WIDTH // 2 - BALL_SIZE // 2, HEIGHT // 2 - BALL_SIZE // 2), (BALL_S
 ball_speed = [BALL_SPEED_X, BALL_SPEED_Y]
 
 # Bricks
-bricks = [Rect((col * BRICK_WIDTH, row * BRICK_HEIGHT), (BRICK_WIDTH, BRICK_HEIGHT)) for row in range(BRICK_ROWS) for col in range(BRICK_COLS)]  # type: ignore
+bricks = [Rect((BRICK_START_X + col * BRICK_WIDTH, BRICK_START_Y + row * BRICK_HEIGHT), (BRICK_WIDTH, BRICK_HEIGHT)) for row in range(BRICK_ROWS) for col in range(BRICK_COLS)]  # type: ignore
 
 def draw():
     screen.clear()  # type: ignore
@@ -89,3 +91,4 @@ def reset_ball():
     ball_speed[1] = BALL_SPEED_Y
 
 pgzrun.go()
+
