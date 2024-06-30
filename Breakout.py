@@ -1,8 +1,12 @@
 import os
-os.environ['SDL_VIDEO_CENTERED'] = '1'  # Center the window
-
-import pgzrun
+import pygame
 import random
+
+# Initialize Pygame
+pygame.init()
+
+# Center the window
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 # Game constants
 WIDTH = 1024
@@ -31,23 +35,33 @@ MAX_BOUNCE_ANGLE = 60  # Max bounce angle in degrees
 MIN_BALL_SPEED_Y = 2  # Minimum vertical speed of the ball
 
 # Game objects
-paddle = Rect((WIDTH // 2 - PADDLE_WIDTH // 2, HEIGHT - 30), (PADDLE_WIDTH, PADDLE_HEIGHT))
-ball = Rect((paddle.centerx - BALL_SIZE // 2, paddle.top - BALL_SIZE - 1), (BALL_SIZE, BALL_SIZE))
+paddle = pygame.Rect((WIDTH // 2 - PADDLE_WIDTH // 2, HEIGHT - 30), (PADDLE_WIDTH, PADDLE_HEIGHT))
+ball = pygame.Rect((paddle.centerx - BALL_SIZE // 2, paddle.top - BALL_SIZE - 1), (BALL_SIZE, BALL_SIZE))
 ball_speed = [BALL_START_SPEED if random.choice([True, False]) else -BALL_START_SPEED, -BALL_START_SPEED]  # Ball moves upwards initially
 
 # Bricks
-bricks = [Rect((BRICK_START_X + col * BRICK_WIDTH, BRICK_START_Y + row * BRICK_HEIGHT), (BRICK_WIDTH, BRICK_HEIGHT)) for row in range(BRICK_ROWS) for col in range(BRICK_COLS)]
+bricks = [pygame.Rect((BRICK_START_X + col * BRICK_WIDTH, BRICK_START_Y + row * BRICK_HEIGHT), (BRICK_WIDTH, BRICK_HEIGHT)) for row in range(BRICK_ROWS) for col in range(BRICK_COLS)]
 
 # Speed up timer
 speed_up_timer = 0
 
+# Setup the screen
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Breakout Game")
+
+# Main game loop
+running = True
+clock = pygame.time.Clock()
+
 def draw():
-    screen.clear()
-    screen.draw.rect(paddle, 'white')
-    screen.draw.filled_rect(ball, 'white')
+    screen.fill((0, 0, 0))
+    pygame.draw.rect(screen, (255, 255, 255), paddle)
+    pygame.draw.ellipse(screen, (255, 255, 255), ball)
 
     for brick in bricks:
-        screen.draw.filled_rect(brick, 'white')
+        pygame.draw.rect(screen, (255, 255, 255), brick)
+    
+    pygame.display.flip()
 
 def update():
     global speed_up_timer
@@ -68,9 +82,10 @@ def update():
             speed_up_timer = 0
 
 def update_paddle():
-    if keyboard.left and paddle.left > 0:
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and paddle.left > 0:
         paddle.x -= PADDLE_SPEED
-    if keyboard.right and paddle.right < WIDTH:
+    if keys[pygame.K_RIGHT] and paddle.right < WIDTH:
         paddle.x += PADDLE_SPEED
 
 def update_ball():
@@ -94,9 +109,6 @@ def update_ball():
     # Ball goes out of bounds (bottom)
     if ball.bottom >= HEIGHT:
         reset_ball()
-
-    # Debug prints
-    print(f"Ball position: ({ball.x}, {ball.y}), Ball speed: {ball_speed}")
 
 def check_ball_brick_collision():
     global bricks, ball_speed
@@ -129,9 +141,6 @@ def reset_ball():
     # Reset the speed up timer
     speed_up_timer = 0
 
-    # Debug prints
-    print(f"Ball reset: position: ({ball.x}, {ball.y}), Ball speed: {ball_speed}")
-
 def increase_ball_speed():
     global ball_speed
     speed_multiplier = 1.1  # Define how much to increase the speed by (10% in this case)
@@ -139,6 +148,14 @@ def increase_ball_speed():
     ball_speed[0] = max(min(ball_speed[0] * speed_multiplier, BALL_MAX_SPEED), -BALL_MAX_SPEED)
     ball_speed[1] = max(min(ball_speed[1] * speed_multiplier, BALL_MAX_SPEED), -BALL_MAX_SPEED)
 
-    print(f"Ball speed increased: {ball_speed}")
+# Main game loop
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+    update()
+    draw()
+    clock.tick(60)
 
-pgzrun.go()
+pygame.quit()
